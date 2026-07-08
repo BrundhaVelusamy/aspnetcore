@@ -649,6 +649,130 @@ public class EventCallbackFactoryBinderExtensionsTest
         Assert.Equal(1, component.Count);
     }
 
+    [Fact]
+    public async Task CreateBinder_Decimal_Format()
+    {
+        var value = 17.5m;
+        var component = new EventCountingComponent();
+        Action<decimal> setter = (_) => value = _;
+        var format = "0.00";
+
+        var binder = EventCallback.Factory.CreateBinder(component, setter, value, format);
+
+        var expectedValue = 42.75m;
+
+        await binder.InvokeAsync(new ChangeEventArgs() { Value = expectedValue.ToString(format, CultureInfo.InvariantCulture), });
+
+        Assert.Equal(expectedValue, value);
+        Assert.Equal(1, component.Count);
+    }
+
+    [Fact]
+    public async Task CreateBinder_Decimal_Format_CultureDeDE()
+    {
+        var value = 17.5m;
+        var component = new EventCountingComponent();
+        Action<decimal> setter = (_) => value = _;
+        var format = "N2";
+        var culture = CultureInfo.GetCultureInfo("de-DE");
+
+        var binder = EventCallback.Factory.CreateBinder(component, setter, value, format, culture);
+
+        var expectedValue = 42.75m;
+
+        await binder.InvokeAsync(new ChangeEventArgs() { Value = expectedValue.ToString(format, culture), });
+
+        Assert.Equal(expectedValue, value);
+        Assert.Equal(1, component.Count);
+    }
+
+    [Fact]
+    public async Task CreateBinder_NullableDecimal_Format()
+    {
+        var value = (decimal?)17.5m;
+        var component = new EventCountingComponent();
+        Action<decimal?> setter = (_) => value = _;
+        var format = "0.00";
+
+        var binder = EventCallback.Factory.CreateBinder(component, setter, value, format);
+
+        var expectedValue = (decimal?)42.75m;
+
+        await binder.InvokeAsync(new ChangeEventArgs() { Value = expectedValue.Value.ToString(format, CultureInfo.InvariantCulture), });
+
+        Assert.Equal(expectedValue, value);
+        Assert.Equal(1, component.Count);
+    }
+
+    [Fact]
+    public async Task CreateBinder_NullableDecimal_Format_NullInput_CallsSetterWithNull()
+    {
+        var value = (decimal?)17.5m;
+        var component = new EventCountingComponent();
+        Action<decimal?> setter = (_) => value = _;
+        var format = "0.00";
+
+        var binder = EventCallback.Factory.CreateBinder(component, setter, value, format);
+
+        await binder.InvokeAsync(new ChangeEventArgs() { Value = string.Empty, });
+
+        Assert.Null(value);
+        Assert.Equal(1, component.Count);
+    }
+
+    [Fact]
+    public async Task CreateBinder_Decimal_Format_InvalidInput_DoesNotCallSetter()
+    {
+        var value = 17.5m;
+        var component = new EventCountingComponent();
+        Action<decimal> setter = (_) => value = _;
+        var format = "0.00";
+
+        var binder = EventCallback.Factory.CreateBinder(component, setter, value, format);
+
+        await binder.InvokeAsync(new ChangeEventArgs() { Value = "not-a-decimal!", });
+
+        Assert.Equal(17.5m, value); // Setter not called
+        Assert.Equal(1, component.Count);
+    }
+
+    [Fact]
+    public async Task CreateBinder_Decimal_Format_TaskSetter()
+    {
+        var value = 17.5m;
+        var component = new EventCountingComponent();
+        Func<decimal, Task> setter = (_) => { value = _; return Task.CompletedTask; };
+        var format = "0.00";
+
+        var binder = EventCallback.Factory.CreateBinder(component, setter, value, format);
+
+        var expectedValue = 42.75m;
+
+        await binder.InvokeAsync(new ChangeEventArgs() { Value = expectedValue.ToString(format, CultureInfo.InvariantCulture), });
+
+        Assert.Equal(expectedValue, value);
+        Assert.Equal(1, component.Count);
+    }
+
+    [Fact]
+    public async Task CreateBinder_Decimal_Format_NumberStyle()
+    {
+        var value = 0m;
+        var component = new EventCountingComponent();
+        Action<decimal> setter = (_) => value = _;
+        var format = "N2";
+        var culture = CultureInfo.InvariantCulture;
+
+        var binder = EventCallback.Factory.CreateBinder(component, setter, value, format, culture);
+
+        var expectedValue = 1234.56m;
+
+        await binder.InvokeAsync(new ChangeEventArgs() { Value = expectedValue.ToString(format, culture), });
+
+        Assert.Equal(expectedValue, value);
+        Assert.Equal(1, component.Count);
+    }
+
     private class EventCountingComponent : IComponent, IHandleEvent
     {
         public int Count;

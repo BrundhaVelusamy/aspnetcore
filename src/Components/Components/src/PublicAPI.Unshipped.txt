@@ -13,3 +13,29 @@ Microsoft.AspNetCore.Components.IComponentPropertyActivator.GetActivator(System.
 *REMOVED*Microsoft.AspNetCore.Components.Routing.Router.PreferExactMatches.get -> bool
 *REMOVED*Microsoft.AspNetCore.Components.Routing.Router.PreferExactMatches.set -> void
 static Microsoft.Extensions.DependencyInjection.CascadingValueServiceCollectionExtensions.TryAddCascadingValueSupplier<TAttribute>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! serviceCollection, System.Func<System.IServiceProvider!, System.Func<Microsoft.AspNetCore.Components.Rendering.ComponentState!, TAttribute!, Microsoft.AspNetCore.Components.CascadingParameterInfo, Microsoft.AspNetCore.Components.CascadingParameterSubscription!>!>! subscribeFactory) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Microsoft.AspNetCore.Components.BindConverter.FormatValue(decimal value, string? format, System.Globalization.CultureInfo? culture = null) -> string!
+static Microsoft.AspNetCore.Components.BindConverter.FormatValue(decimal? value, string? format, System.Globalization.CultureInfo? culture = null) -> string?
+static Microsoft.AspNetCore.Components.BindConverter.FormatValue(double value, string? format, System.Globalization.CultureInfo? culture = null) -> string?
+static Microsoft.AspNetCore.Components.BindConverter.FormatValue(double? value, string? format, System.Globalization.CultureInfo? culture = null) -> string?
+static Microsoft.AspNetCore.Components.BindConverter.FormatValue(float value, string? format, System.Globalization.CultureInfo? culture = null) -> string!
+static Microsoft.AspNetCore.Components.BindConverter.FormatValue(float? value, string? format, System.Globalization.CultureInfo? culture = null) -> string?
+static Microsoft.AspNetCore.Components.BindConverter.FormatValue(int value, string? format, System.Globalization.CultureInfo? culture = null) -> string?
+static Microsoft.AspNetCore.Components.BindConverter.FormatValue(int? value, string? format, System.Globalization.CultureInfo? culture = null) -> string?
+static Microsoft.AspNetCore.Components.BindConverter.FormatValue(long value, string? format, System.Globalization.CultureInfo? culture = null) -> string!
+static Microsoft.AspNetCore.Components.BindConverter.FormatValue(long? value, string? format, System.Globalization.CultureInfo? culture = null) -> string?
+static Microsoft.AspNetCore.Components.BindConverter.FormatValue(short value, string? format, System.Globalization.CultureInfo? culture = null) -> string!
+static Microsoft.AspNetCore.Components.BindConverter.FormatValue(short? value, string? format, System.Globalization.CultureInfo? culture = null) -> string?
+static Microsoft.AspNetCore.Components.BindConverter.TryConvertToDecimal(object? obj, System.Globalization.CultureInfo? culture, string? format, out decimal value) -> bool
+static Microsoft.AspNetCore.Components.BindConverter.TryConvertToNullableDecimal(object? obj, System.Globalization.CultureInfo? culture, string? format, out decimal? value) -> bool
+static Microsoft.AspNetCore.Components.BindConverter.TryConvertToDouble(object? obj, System.Globalization.CultureInfo? culture, string? format, out double value) -> bool
+static Microsoft.AspNetCore.Components.BindConverter.TryConvertToNullableDouble(object? obj, System.Globalization.CultureInfo? culture, string? format, out double? value) -> bool
+static Microsoft.AspNetCore.Components.BindConverter.TryConvertToFloat(object? obj, System.Globalization.CultureInfo? culture, string? format, out float value) -> bool
+static Microsoft.AspNetCore.Components.BindConverter.TryConvertToNullableFloat(object? obj, System.Globalization.CultureInfo? culture, string? format, out float? value) -> bool
+static Microsoft.AspNetCore.Components.BindConverter.TryConvertToInt(object? obj, System.Globalization.CultureInfo? culture, string? format, out int value) -> bool
+static Microsoft.AspNetCore.Components.BindConverter.TryConvertToNullableInt(object? obj, System.Globalization.CultureInfo? culture, string? format, out int? value) -> bool
+static Microsoft.AspNetCore.Components.BindConverter.TryConvertToLong(object? obj, System.Globalization.CultureInfo? culture, string? format, out long value) -> bool
+static Microsoft.AspNetCore.Components.BindConverter.TryConvertToNullableLong(object? obj, System.Globalization.CultureInfo? culture, string? format, out long? value) -> bool
+static Microsoft.AspNetCore.Components.BindConverter.TryConvertToShort(object? obj, System.Globalization.CultureInfo? culture, string? format, out short value) -> bool
+static Microsoft.AspNetCore.Components.BindConverter.TryConvertToNullableShort(object? obj, System.Globalization.CultureInfo? culture, string? format, out short? value) -> bool
+static Microsoft.AspNetCore.Components.EventCallbackFactoryBinderExtensions.CreateBinder<T>(this Microsoft.AspNetCore.Components.EventCallbackFactory! factory, object! receiver, System.Action<T>! setter, T existingValue, string! format, System.Globalization.CultureInfo? culture = null) -> Microsoft.AspNetCore.Components.EventCallback<Microsoft.AspNetCore.Components.ChangeEventArgs!>
+static Microsoft.AspNetCore.Components.EventCallbackFactoryBinderExtensions.CreateBinder<T>(this Microsoft.AspNetCore.Components.EventCallbackFactory! factory, object! receiver, System.Func<T, System.Threading.Tasks.Task!>! setter, T existingValue, string! format, System.Globalization.CultureInfo? culture = null) -> Microsoft.AspNetCore.Components.EventCallback<Microsoft.AspNetCore.Components.ChangeEventArgs!>

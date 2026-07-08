@@ -1336,6 +1336,106 @@ public static class EventCallbackFactoryBinderExtensions
         return CreateBinderCoreAsync<T>(factory, receiver, setter, culture, ParserDelegateCache.Get<T>());
     }
 
+    /// <summary>
+    /// For internal use only.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="factory"></param>
+    /// <param name="receiver"></param>
+    /// <param name="setter"></param>
+    /// <param name="existingValue"></param>
+    /// <param name="format"></param>
+    /// <param name="culture"></param>
+    /// <returns></returns>
+    [SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "Required to maintain compatibility")]
+    public static EventCallback<ChangeEventArgs> CreateBinder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(
+        this EventCallbackFactory factory,
+        object receiver,
+        Action<T> setter,
+        T existingValue,
+        string format,
+        CultureInfo? culture = null)
+    {
+        return CreateBinderCore<T>(factory, receiver, setter, culture, format, GetParserWithFormat<T>());
+    }
+
+    /// <summary>
+    /// For internal use only.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="factory"></param>
+    /// <param name="receiver"></param>
+    /// <param name="setter"></param>
+    /// <param name="existingValue"></param>
+    /// <param name="format"></param>
+    /// <param name="culture"></param>
+    /// <returns></returns>
+    [SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "Required to maintain compatibility")]
+    public static EventCallback<ChangeEventArgs> CreateBinder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(
+        this EventCallbackFactory factory,
+        object receiver,
+        Func<T, Task> setter,
+        T existingValue,
+        string format,
+        CultureInfo? culture = null)
+    {
+        return CreateBinderCoreAsync<T>(factory, receiver, setter, culture, format, GetParserWithFormat<T>());
+    }
+
+    private static BindConverter.BindParserWithFormat<T> GetParserWithFormat<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>()
+    {
+        if (typeof(T) == typeof(int))
+        {
+            return (BindConverter.BindParserWithFormat<T>)(Delegate)BindConverter.ConvertToIntWithFormat;
+        }
+        else if (typeof(T) == typeof(int?))
+        {
+            return (BindConverter.BindParserWithFormat<T>)(Delegate)BindConverter.ConvertToNullableIntWithFormat;
+        }
+        else if (typeof(T) == typeof(long))
+        {
+            return (BindConverter.BindParserWithFormat<T>)(Delegate)BindConverter.ConvertToLongWithFormat;
+        }
+        else if (typeof(T) == typeof(long?))
+        {
+            return (BindConverter.BindParserWithFormat<T>)(Delegate)BindConverter.ConvertToNullableLongWithFormat;
+        }
+        else if (typeof(T) == typeof(short))
+        {
+            return (BindConverter.BindParserWithFormat<T>)(Delegate)BindConverter.ConvertToShortWithFormat;
+        }
+        else if (typeof(T) == typeof(short?))
+        {
+            return (BindConverter.BindParserWithFormat<T>)(Delegate)BindConverter.ConvertToNullableShortWithFormat;
+        }
+        else if (typeof(T) == typeof(float))
+        {
+            return (BindConverter.BindParserWithFormat<T>)(Delegate)BindConverter.ConvertToFloatWithFormat;
+        }
+        else if (typeof(T) == typeof(float?))
+        {
+            return (BindConverter.BindParserWithFormat<T>)(Delegate)BindConverter.ConvertToNullableFloatWithFormat;
+        }
+        else if (typeof(T) == typeof(double))
+        {
+            return (BindConverter.BindParserWithFormat<T>)(Delegate)BindConverter.ConvertToDoubleWithFormat;
+        }
+        else if (typeof(T) == typeof(double?))
+        {
+            return (BindConverter.BindParserWithFormat<T>)(Delegate)BindConverter.ConvertToNullableDoubleWithFormat;
+        }
+        else if (typeof(T) == typeof(decimal))
+        {
+            return (BindConverter.BindParserWithFormat<T>)(Delegate)BindConverter.ConvertToDecimalWithFormat;
+        }
+        else if (typeof(T) == typeof(decimal?))
+        {
+            return (BindConverter.BindParserWithFormat<T>)(Delegate)BindConverter.ConvertToNullableDecimalWithFormat;
+        }
+
+        throw new InvalidOperationException($"The type '{typeof(T).FullName}' does not support format-aware binding.");
+    }
+
     private static EventCallback<ChangeEventArgs> CreateBinderCore<T>(
         this EventCallbackFactory factory,
         object receiver,

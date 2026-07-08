@@ -369,6 +369,503 @@ public class BindConverterTest
         Assert.Null(actual);
     }
 
+    [Fact]
+    public void FormatValue_Decimal_Format()
+    {
+        var value = 20129.99m;
+        var expected = value.ToString("N2", CultureInfo.InvariantCulture);
+
+        var actual = BindConverter.FormatValue(value, "N2", CultureInfo.InvariantCulture);
+
+        Assert.Equal(expected, actual);
+    }
+
+    [Theory]
+    [InlineData(0, "N2", "0.00")]
+    [InlineData(1234, "N0", "1,234")]
+    [InlineData(-1234, "N0", "-1,234")]
+    [InlineData(20129.99, "N2", "20,129.99")]
+    [InlineData(20129.99, "C2", "¤20,129.99")]
+    [InlineData(0.85, "P0", "85 %")]
+    [InlineData(1234.567, "0.####", "1234.567")]
+    [InlineData(0, "0", "0")]
+    [InlineData(0, "0.00", "0.00")]
+    [InlineData(1234567890.12, "#,##0.00", "1,234,567,890.12")]
+    public void FormatValue_Decimal_WithFormat(double input, string format, string expected)
+    {
+        var value = (decimal)input;
+
+        var actual = BindConverter.FormatValue(value, format, CultureInfo.InvariantCulture);
+
+        Assert.Equal(expected, actual);
+        Assert.Equal(value.ToString(format, CultureInfo.InvariantCulture), actual);
+    }
+
+    [Fact]
+    public void FormatValue_Decimal_WithFormat_Nullable()
+    {
+        decimal? value = 20129.99m;
+
+        var actual = BindConverter.FormatValue(value, "N2", CultureInfo.InvariantCulture);
+
+        Assert.Equal("20,129.99", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Decimal_WithFormat_NullableNull()
+    {
+        decimal? value = null;
+
+        var actual = BindConverter.FormatValue(value, "N2", CultureInfo.InvariantCulture);
+
+        Assert.Null(actual);
+    }
+
+    [Fact]
+    public void FormatValue_Decimal_WithFormat_NullFormat()
+    {
+        var value = 20129.99m;
+
+        var actual = BindConverter.FormatValue(value, format: null, CultureInfo.InvariantCulture);
+
+        Assert.Equal(value.ToString(CultureInfo.InvariantCulture), actual);
+    }
+
+    [Fact]
+    public void FormatValue_Decimal_WithFormat_NullCulture_UsesCurrentCulture()
+    {
+        var value = 20129.99m;
+        var savedCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
+            var actual = BindConverter.FormatValue(value, "N2", culture: null);
+
+            Assert.Equal("20,129.99", actual);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = savedCulture;
+        }
+    }
+
+    [Theory]
+    [InlineData(20129.99, "N2")]
+    [InlineData(1234.567, "0.####")]
+    [InlineData(1234.5, "0.0")]
+    [InlineData(0, "N0")]
+    [InlineData(-1234, "N0")]
+    public void FormatValue_Decimal_RoundTrip(double value, string format)
+    {
+        var decimalValue = (decimal)value;
+        var invariant = CultureInfo.InvariantCulture;
+
+        var formatted = BindConverter.FormatValue(decimalValue, format, invariant);
+        var converted = decimal.Parse(formatted, NumberStyles.Number, invariant);
+
+        Assert.Equal(decimalValue, converted);
+    }
+
+    [Fact]
+    public void FormatValue_Decimal_WithFormat_DeDECulture()
+    {
+        var value = 20129.99m;
+        var culture = CultureInfo.GetCultureInfo("de-DE");
+
+        var actual = BindConverter.FormatValue(value, "N2", culture);
+
+        Assert.Equal("20.129,99", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Decimal_WithFormat_FrFRCulture()
+    {
+        var value = 20129.99m;
+        var culture = CultureInfo.GetCultureInfo("fr-FR");
+
+        var actual = BindConverter.FormatValue(value, "N2", culture);
+
+        var expected = value.ToString("N2", culture);
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    public void FormatValue_Decimal_WithFormat_JaJPCulture()
+    {
+        var value = 20129.99m;
+        var culture = CultureInfo.GetCultureInfo("ja-JP");
+
+        var actual = BindConverter.FormatValue(value, "N2", culture);
+
+        Assert.Contains("20,129.99", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Float_WithFormat()
+    {
+        var value = 1234.5678f;
+
+        var actual = BindConverter.FormatValue(value, "N2", CultureInfo.InvariantCulture);
+
+        Assert.Equal("1,234.57", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Float_WithFormat_Nullable()
+    {
+        float? value = 1234.5678f;
+
+        var actual = BindConverter.FormatValue(value, "N2", CultureInfo.InvariantCulture);
+
+        Assert.Equal("1,234.57", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Float_WithFormat_NullableNull()
+    {
+        float? value = null;
+
+        var actual = BindConverter.FormatValue(value, "N2", CultureInfo.InvariantCulture);
+
+        Assert.Null(actual);
+    }
+
+    [Fact]
+    public void FormatValue_Float_WithFormat_Percent()
+    {
+        var value = 0.85f;
+
+        var actual = BindConverter.FormatValue(value, "P1", CultureInfo.InvariantCulture);
+
+        Assert.Equal(value.ToString("P1", CultureInfo.InvariantCulture), actual);
+    }
+
+    [Fact]
+    public void FormatValue_Float_WithFormat_EmptyString()
+    {
+        var value = 0f;
+
+        var actual = BindConverter.FormatValue(value, "", CultureInfo.InvariantCulture);
+
+        Assert.Equal("0", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Float_WithFormat_NullFormat()
+    {
+        var value = 1234.5f;
+
+        var actual = BindConverter.FormatValue(value, format: null, CultureInfo.InvariantCulture);
+
+        Assert.Equal("1234.5", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Double_WithFormat()
+    {
+        var value = 1234.5678;
+
+        var actual = BindConverter.FormatValue(value, "N2", CultureInfo.InvariantCulture);
+
+        Assert.Equal("1,234.57", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Double_WithFormat_Nullable()
+    {
+        double? value = 1234.5678;
+
+        var actual = BindConverter.FormatValue(value, "N2", CultureInfo.InvariantCulture);
+
+        Assert.Equal("1,234.57", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Double_WithFormat_NullableNull()
+    {
+        double? value = null;
+
+        var actual = BindConverter.FormatValue(value, "N2", CultureInfo.InvariantCulture);
+
+        Assert.Null(actual);
+    }
+
+    [Fact]
+    public void FormatValue_Double_WithFormat_HighPrecision()
+    {
+        var value = 3.14159265358979;
+
+        var actual = BindConverter.FormatValue(value, "F5", CultureInfo.InvariantCulture);
+
+        Assert.Equal("3.14159", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Double_WithFormat_Scientific()
+    {
+        var value = 1234567890.0;
+
+        var actual = BindConverter.FormatValue(value, "E2", CultureInfo.InvariantCulture);
+
+        Assert.Equal("1.23E+009", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Double_WithFormat_NullFormat()
+    {
+        var value = 1234.5678;
+
+        var actual = BindConverter.FormatValue(value, format: null, CultureInfo.InvariantCulture);
+
+        Assert.Equal("1234.5678", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Int_WithFormat()
+    {
+        var value = 1234;
+
+        var actual = BindConverter.FormatValue(value, "N0", CultureInfo.InvariantCulture);
+
+        Assert.Equal("1,234", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Int_WithFormat_Nullable()
+    {
+        int? value = 1234;
+
+        var actual = BindConverter.FormatValue(value, "N0", CultureInfo.InvariantCulture);
+
+        Assert.Equal("1,234", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Int_WithFormat_NullableNull()
+    {
+        int? value = null;
+
+        var actual = BindConverter.FormatValue(value, "N0", CultureInfo.InvariantCulture);
+
+        Assert.Null(actual);
+    }
+
+    [Fact]
+    public void FormatValue_Int_WithFormat_Hex()
+    {
+        var value = 255;
+
+        var actual = BindConverter.FormatValue(value, "X", CultureInfo.InvariantCulture);
+
+        Assert.Equal("FF", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Int_WithFormat_NullFormat()
+    {
+        var value = 1234;
+
+        var actual = BindConverter.FormatValue(value, format: null, CultureInfo.InvariantCulture);
+
+        Assert.Equal("1234", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Long_WithFormat()
+    {
+        var value = 1234567890123L;
+
+        var actual = BindConverter.FormatValue(value, "N0", CultureInfo.InvariantCulture);
+
+        Assert.Equal("1,234,567,890,123", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Long_WithFormat_Nullable()
+    {
+        long? value = 1234567890123L;
+
+        var actual = BindConverter.FormatValue(value, "N0", CultureInfo.InvariantCulture);
+
+        Assert.Equal("1,234,567,890,123", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Long_WithFormat_NullableNull()
+    {
+        long? value = null;
+
+        var actual = BindConverter.FormatValue(value, "N0", CultureInfo.InvariantCulture);
+
+        Assert.Null(actual);
+    }
+
+    [Fact]
+    public void FormatValue_Long_WithFormat_NullFormat()
+    {
+        var value = 1234567890123L;
+
+        var actual = BindConverter.FormatValue(value, format: null, CultureInfo.InvariantCulture);
+
+        Assert.Equal("1234567890123", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Short_WithFormat()
+    {
+        var value = (short)1234;
+
+        var actual = BindConverter.FormatValue(value, "N0", CultureInfo.InvariantCulture);
+
+        Assert.Equal("1,234", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Short_WithFormat_Nullable()
+    {
+        short? value = 1234;
+
+        var actual = BindConverter.FormatValue(value, "N0", CultureInfo.InvariantCulture);
+
+        Assert.Equal("1,234", actual);
+    }
+
+    [Fact]
+    public void FormatValue_Short_WithFormat_NullableNull()
+    {
+        short? value = null;
+
+        var actual = BindConverter.FormatValue(value, "N0", CultureInfo.InvariantCulture);
+
+        Assert.Null(actual);
+    }
+
+    [Fact]
+    public void FormatValue_Short_WithFormat_NullFormat()
+    {
+        var value = (short)1234;
+
+        var actual = BindConverter.FormatValue(value, format: null, CultureInfo.InvariantCulture);
+
+        Assert.Equal("1234", actual);
+    }
+
+    [Theory]
+    [InlineData(100.0f, "N0", "100")]
+    [InlineData(-1234.5f, "0.0", "-1234.5")]
+    [InlineData(1234.56f, "0.00", "1234.56")]
+    [InlineData(0.0f, "N0", "0")]
+    public void FormatValue_Float_RoundTrip(float value, string format, string expected)
+    {
+        var invariant = CultureInfo.InvariantCulture;
+
+        var formatted = BindConverter.FormatValue(value, format, invariant);
+
+        Assert.Equal(expected, formatted);
+        Assert.Equal(value.ToString(format, invariant), formatted);
+    }
+
+    [Theory]
+    [InlineData(0.5, "0.00", "0.50")]
+    [InlineData(100.0, "C0", "¤100")]
+    [InlineData(-1234.567, "0.###", "-1234.567")]
+    [InlineData(0.0, "N0", "0")]
+    public void FormatValue_Double_RoundTrip(double value, string format, string expected)
+    {
+        var invariant = CultureInfo.InvariantCulture;
+
+        var formatted = BindConverter.FormatValue(value, format, invariant);
+
+        Assert.Equal(expected, formatted);
+        Assert.Equal(value.ToString(format, invariant), formatted);
+    }
+
+    [Theory]
+    [InlineData(100, "N0", "100")]
+    [InlineData(-1234, "N0", "-1,234")]
+    [InlineData(1234567, "N0", "1,234,567")]
+    [InlineData(int.MaxValue, "N0", "2,147,483,647")]
+    [InlineData(int.MinValue, "N0", "-2,147,483,648")]
+    [InlineData(42, "D5", "00042")]
+    [InlineData(255, "X", "FF")]
+    public void FormatValue_Int_RoundTrip(double value, string format, string expected)
+    {
+        var intValue = (int)value;
+        var invariant = CultureInfo.InvariantCulture;
+
+        var formatted = BindConverter.FormatValue(intValue, format, invariant);
+
+        Assert.Equal(expected, formatted);
+        Assert.Equal(intValue.ToString(format, invariant), formatted);
+    }
+
+    [Theory]
+    [InlineData(1234, "N0", "1,234")]
+    [InlineData(0, "D5", "00000")]
+    [InlineData(-1, "D3", "-001")]
+    [InlineData(42, "X", "2A")]
+    public void FormatValue_Short_RoundTrip(double value, string format, string expected)
+    {
+        var shortValue = (short)value;
+        var invariant = CultureInfo.InvariantCulture;
+
+        var formatted = BindConverter.FormatValue(shortValue, format, invariant);
+
+        Assert.Equal(expected, formatted);
+        Assert.Equal(shortValue.ToString(format, invariant), formatted);
+    }
+
+    [Theory]
+    [InlineData(0L, "N0", "0")]
+    [InlineData(1234567890L, "N0", "1,234,567,890")]
+    [InlineData(long.MaxValue, "N0", "9,223,372,036,854,775,807")]
+    [InlineData(long.MinValue, "N0", "-9,223,372,036,854,775,808")]
+    public void FormatValue_Long_RoundTrip(double value, string format, string expected)
+    {
+        var longValue = (long)value;
+        var invariant = CultureInfo.InvariantCulture;
+
+        var formatted = BindConverter.FormatValue(longValue, format, invariant);
+
+        Assert.Equal(expected, formatted);
+        Assert.Equal(longValue.ToString(format, invariant), formatted);
+    }
+
+    [Fact]
+    public void FormatValue_Decimal_WithFormat_DoNotMutateValue()
+    {
+        var value = 20129.99m;
+        var beforeFormat = value;
+        var invariant = CultureInfo.InvariantCulture;
+
+        _ = BindConverter.FormatValue(value, "N2", invariant);
+
+        Assert.Equal(beforeFormat, value);
+    }
+
+    [Fact]
+    public void FormatValue_NullableDecimal_WithFormat_DoNotMutateValue()
+    {
+        decimal? value = 20129.99m;
+        var beforeFormat = value;
+        var invariant = CultureInfo.InvariantCulture;
+
+        _ = BindConverter.FormatValue(value, "N2", invariant);
+
+        Assert.Equal(beforeFormat, value);
+    }
+
+    [Fact]
+    public void FormatValue_Decimal_EmptyFormat_ProducesInvariant()
+    {
+        var value = 123.45m;
+
+        var actual = BindConverter.FormatValue(value, string.Empty, CultureInfo.InvariantCulture);
+
+        Assert.Equal("123.45", actual);
+    }
+
     private enum SomeLetters
     {
         A,
