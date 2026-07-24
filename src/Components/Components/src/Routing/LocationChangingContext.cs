@@ -27,7 +27,9 @@ public sealed class LocationChangingContext
 
     /// <summary>
     /// Gets a <see cref="System.Threading.CancellationToken"/> that can be used to determine if this navigation was canceled
-    /// (for example, because the user has triggered a different navigation).
+    /// (for example, because the user has triggered a different navigation). The token is only canceled when the
+    /// navigation is actually canceled (for example, because <see cref="PreventNavigation"/> was called, or because a
+    /// successive navigation superseded this one). It is not canceled when the navigation completes successfully.
     /// </summary>
     public CancellationToken CancellationToken { get; init; }
 
