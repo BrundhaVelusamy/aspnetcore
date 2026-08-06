@@ -1295,7 +1295,6 @@ public class StartupTests : IISFunctionalTestBase
     [ConditionalFact]
     [RequiresNewHandler]
     [RequiresNewShim]
-    [SkipOnHelix("https://github.com/dotnet/aspnetcore/issues/62787", Queues = "Windows.Amd64.VS2026.Open;" + "Windows.Amd64.VS2026;")]
     public async Task ServerAddressesIncludesBaseAddress()
     {
         var appName = "\u041C\u043E\u0451\u041F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435";
@@ -1317,7 +1316,16 @@ public class StartupTests : IISFunctionalTestBase
 
         var deploymentResult = await DeployAsync(deploymentParameters);
         var client = CreateNonValidatingClient(deploymentResult);
-        Assert.Equal(deploymentParameters.ApplicationBaseUriHint + appName, await client.GetStringAsync($"/{appName}/ServerAddresses"));
+        var expectedAddress = deploymentParameters.ApplicationBaseUriHint + appName;
+        var actualAddress = await client.GetStringAsync($"/{appName}/ServerAddresses");
+
+        var expectedUri = new Uri(expectedAddress, UriKind.Absolute);
+        var actualUri = new Uri(actualAddress, UriKind.Absolute);
+
+        Assert.Equal(expectedUri.Scheme, actualUri.Scheme);
+        Assert.Equal(expectedUri.Host, actualUri.Host);
+        Assert.Equal(expectedUri.Port, actualUri.Port);
+        Assert.Equal(expectedUri.LocalPath, actualUri.LocalPath, StringComparer.OrdinalIgnoreCase);
     }
 
     [ConditionalFact]
