@@ -14,8 +14,7 @@
 
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 
-    <!-- QuickGridAnchorModeComponent intentionally consumes QuickGrid's experimental AnchorMode/ItemComparer APIs. -->
-    <NoWarn>$(NoWarn);ASP0030</NoWarn>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.Extensions.Validation.Generated</InterceptorsNamespaces>
 
   </PropertyGroup>
 
@@ -57,6 +56,9 @@
   <ItemGroup>
     <ProjectReference Include="..\TestContentPackage\TestContentPackage.csproj" />
     <ProjectReference Include="..\LazyTestContentPackage\LazyTestContentPackage.csproj" />
+    <ProjectReference Include="$(RepoRoot)src\Validation\gen\Microsoft.Extensions.Validation.ValidationsGenerator.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -79,4 +81,3 @@
   </Target>
 
 </Project>
-
