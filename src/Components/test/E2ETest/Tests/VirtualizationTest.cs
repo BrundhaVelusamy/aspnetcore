@@ -5158,6 +5158,65 @@ public class VirtualizationTest : ServerTestBase<ToggleExecutionModeServerFixtur
         }, TimeSpan.FromSeconds(10),
             $"Window AnchorMode {anchorMode}: Home key should jump to the top");
     }
+
+    [Theory]
+    [InlineData("End", "45:Name 45x")]
+    [InlineData("Home", "45:xName 45")]
+    public void JumpKeyInTextInputInsideList_MovesCaretWithoutJumping(string key, string expectedEdit)
+    {
+        Browser.MountTestComponent<VirtualizationKeyboardInput>();
+        var container = Browser.Exists(By.Id("keyboard-input-container"));
+        var js = (IJavaScriptExecutor)Browser;
+        ScrollContainer(js, container, 1200);
+        var input = Browser.Exists(By.CssSelector(".item[data-index='45'] .row-input"));
+        input.Click();
+        var scrollTopBefore = GetScrollTop(js, container);
+
+        input.SendKeys(key == "End" ? Keys.End : Keys.Home);
+        input.SendKeys("x");
+
+        Browser.Equal(expectedEdit, () => Browser.Exists(By.Id("last-edit")).Text);
+        Assert.Equal(scrollTopBefore, GetScrollTop(js, container));
+    }
+
+    [Theory]
+    [InlineData("Home", true)]
+    [InlineData("End", true)]
+    [InlineData("Home", false)]
+    [InlineData("End", false)]
+    public void JumpKeyInCheckboxInsideList_RespectsDefaultPrevented(string key, bool preventDefault)
+    {
+        Browser.MountTestComponent<VirtualizationKeyboardInput>();
+        var container = Browser.Exists(By.Id("keyboard-input-container"));
+        var js = (IJavaScriptExecutor)Browser;
+        ScrollContainer(js, container, 1200);
+        var checkbox = Browser.Exists(By.CssSelector(".item[data-index='45'] .row-checkbox"));
+        if (preventDefault)
+        {
+            // WebDriver cannot register a native handler that runs before Virtualize's listener.
+            js.ExecuteScript(
+                "arguments[0].addEventListener('keydown', e => { if (e.key === 'End' || e.key === 'Home') e.preventDefault(); });",
+                checkbox);
+        }
+        checkbox.Click();
+        Browser.Equal("45:True", () => Browser.Exists(By.Id("last-edit")).Text);
+        var scrollTopBefore = GetScrollTop(js, container);
+
+        checkbox.SendKeys(key == "End" ? Keys.End : Keys.Home);
+        if (preventDefault)
+        {
+            checkbox.SendKeys(Keys.Space);
+            Browser.Equal("45:False", () => Browser.Exists(By.Id("last-edit")).Text);
+            Assert.Equal(scrollTopBefore, GetScrollTop(js, container));
+        }
+        else
+        {
+            var index = key == "End" ? "999" : "0";
+            Browser.True(() => container.FindElements(By.CssSelector($".item[data-index='{index}']")).Count > 0,
+                $"{key} in a checkbox should still jump the list");
+        }
+    }
+
     private static (string index, double relTop, long scrollTop) GetItemPositionInContainer(
         IJavaScriptExecutor js, IWebElement container, string itemSelector, string dataIndex = null)
     {

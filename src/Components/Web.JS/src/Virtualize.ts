@@ -614,9 +614,33 @@ function init(dotNetHelper: DotNet.DotNetObject, spacerBefore: HTMLElement, spac
     return ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', ' '].includes(key);
   }
 
+  const textEntryInputTypes = [
+    'text',
+    'search',
+    'email',
+    'number',
+    'password',
+    'url',
+    'tel',
+    'range',
+  ];
+  function isHandledByFocusedControl(target: EventTarget | null): boolean {
+    if (target instanceof HTMLInputElement) {
+      return textEntryInputTypes.includes(target.type);
+    }
+
+    return target instanceof HTMLTextAreaElement
+      || target instanceof HTMLSelectElement
+      || (target instanceof HTMLElement && target.isContentEditable);
+  }
+
   const keydownTarget: EventTarget = scrollContainer || document;
   function handleJumpKeys(e: Event): void {
     const ke = e as KeyboardEvent;
+    if ((ke.key === 'End' || ke.key === 'Home') && (ke.defaultPrevented || isHandledByFocusedControl(ke.target))) {
+      return;
+    }
+
     if (ke.key === 'End') {
       interruptProgrammaticScroll();
       scrollActivity.source = ScrollSource.UserScroll;

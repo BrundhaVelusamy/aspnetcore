@@ -1,0 +1,17 @@
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+
+<div id="keyboard-input-container" style="height: 300px; overflow-y: auto; border: 1px solid black;">
+    <Virtualize Items="@items" ItemSize="30" Context="index">
+        <div class="item" data-index="@index" style="height: 30px;">
+            <input class="row-input" value="Name @index" @oninput="@(e => lastEdit = $"{index}:{e.Value}")" />
+            <input class="row-checkbox" type="checkbox" @onchange="@(e => lastEdit = $"{index}:{e.Value}")" />
+        </div>
+    </Virtualize>
+</div>
+
+<p id="last-edit">@lastEdit</p>
+
+@code {
+    private readonly List<int> items = Enumerable.Range(0, 1000).ToList();
+    private string lastEdit = "None";
+}
