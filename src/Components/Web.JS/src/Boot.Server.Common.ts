@@ -19,7 +19,7 @@ let appState: string;
 let circuit: CircuitManager;
 let options: CircuitStartOptions;
 let logger: ConsoleLogger;
-let serverStartPromise: Promise<void>;
+let serverStartPromise: Promise<boolean>;
 let circuitStarting: Promise<boolean> | undefined;
 
 export function setCircuitOptions(optionsReady: Promise<Partial<CircuitStartOptions>>) {
@@ -30,17 +30,17 @@ export function setCircuitOptions(optionsReady: Promise<Partial<CircuitStartOpti
   circuitOptionsPromise = optionsReady;
 }
 
-export function startServer(components: RootComponentManager<ServerComponentDescriptor>, jsEventRegistry: JSEventRegistry): Promise<void> {
+export function startServer(components: RootComponentManager<ServerComponentDescriptor>, jsEventRegistry: JSEventRegistry): Promise<boolean> {
   if (serverStartPromise !== undefined) {
     throw new Error('Blazor Server has already started.');
   }
 
-  serverStartPromise = new Promise(startServerCore.bind(null, components, jsEventRegistry));
+  serverStartPromise = startServerCore(components, jsEventRegistry);
 
   return serverStartPromise;
 }
 
-async function startServerCore(components: RootComponentManager<ServerComponentDescriptor>, jsEventRegistry: JSEventRegistry, resolve: () => void, _: any) {
+async function startServerCore(components: RootComponentManager<ServerComponentDescriptor>, jsEventRegistry: JSEventRegistry): Promise<boolean> {
   options = resolveOptions(await circuitOptionsPromise);
   const jsInitializer = await fetchAndInvokeInitializers(options);
 
@@ -107,8 +107,7 @@ async function startServerCore(components: RootComponentManager<ServerComponentD
   const circuitStarted = await circuit.start();
   if (!circuitStarted) {
     logger.log(LogLevel.Error, 'Failed to start the circuit.');
-    resolve();
-    return;
+    return false;
   }
 
   const cleanup = () => {
@@ -122,7 +121,7 @@ async function startServerCore(components: RootComponentManager<ServerComponentD
   logger.log(LogLevel.Information, 'Blazor server-side application started.');
 
   jsInitializer.invokeAfterStartedCallbacks(Blazor);
-  resolve();
+  return true;
 }
 
 export async function startCircuit(): Promise<boolean> {
@@ -186,7 +185,7 @@ export function updateServerRootComponents(operations: string, serverState: stri
   if (circuit && !circuit.isDisposedOrDisposing()) {
     return circuit.updateRootComponents(operations, serverState);
   } else {
-    scheduleWhenReady(operations, serverState);
+    scheduleWhenReady(operations, serverState).catch(error => console.error(error));
   }
 }
 async function scheduleWhenReady(operations: string, serverState: string) {

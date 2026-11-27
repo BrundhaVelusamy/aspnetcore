@@ -360,7 +360,7 @@ export class WebRootComponentManager implements DescriptorHandler, RootComponent
     const resolvedType = descriptor.type === 'auto' ? this.getAutoRenderMode() : descriptor.type;
     switch (resolvedType) {
       case 'server':
-        this.startCircutIfNotStarted();
+        this.startCircutIfNotStarted()?.catch(error => console.error(error));
         return WebRendererId.Server;
       case 'webassembly':
         this.startWebAssemblyIfNotStarted();

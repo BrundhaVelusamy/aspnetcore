@@ -27,12 +27,16 @@ function boot(userOptions?: BlazorServerStartOptions): Promise<void> {
 
   const serverComponents = discoverComponents(document, 'server') as ServerComponentDescriptor[];
   const components = new InitialRootComponentsList(serverComponents);
-  return startServer(components, JSEventRegistry.create(Blazor));
+  return startServer(components, JSEventRegistry.create(Blazor)).then(circuitStarted => {
+    if (!circuitStarted) {
+      throw new Error('Failed to start the circuit.');
+    }
+  });
 }
 
 Blazor.start = boot;
 window['DotNet'] = DotNet;
 
 if (shouldAutoStart()) {
-  boot();
+  boot().catch(error => console.error(error));
 }

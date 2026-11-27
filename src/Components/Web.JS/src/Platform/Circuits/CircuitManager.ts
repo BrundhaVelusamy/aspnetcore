@@ -571,9 +571,10 @@ export class CircuitManager implements DotNet.DotNetCallDispatcher {
   private unhandledError(err: Error): void {
     this._logger.log(LogLevel.Error, err);
 
-    // Disconnect on errors.
-    // Trying to call methods on the connection after its been closed will throw.
-    this.disconnect();
+    // A failed initial connection has no circuit to disconnect.
+    if (this._circuitId) {
+      this.disconnect();
+    }
   }
 
   private getDisconnectFormData(): FormData {
